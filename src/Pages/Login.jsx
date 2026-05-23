@@ -16,15 +16,25 @@ export default function Login() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { alert(error.message); setLoading(false); return }
 
-    const { data: profile } = await supabase
-      .from('profiles').select('role').eq('id', data.user.id).single()
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .maybeSingle();
 
-    if (profile?.role !== 'admin') {
-      alert('Access denied')
-      await supabase.auth.signOut()
-      setLoading(false)
-      return
-    }
+  if (profileError) {
+    alert(profileError.message)
+    await supabase.auth.signOut()
+    setLoading(false)
+    return
+  }
+
+  if (!profile || profile.role !== 'admin') {
+    alert('Access denied')
+    await supabase.auth.signOut()
+    setLoading(false)
+    return
+  }
     navigate('/dashboard')
   }
 

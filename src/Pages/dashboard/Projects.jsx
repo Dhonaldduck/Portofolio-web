@@ -204,6 +204,10 @@ const ProjectForm = ({
   });
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(initial?.Img || null);
+  
+  const [existingGallery, setExistingGallery] = useState(initial?.gallery || []);
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [galleryPreviews, setGalleryPreviews] = useState([]);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -214,11 +218,28 @@ const ProjectForm = ({
     setPreview(URL.createObjectURL(f));
   };
 
+  const handleGalleryChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    setGalleryFiles(prev => [...prev, ...files]);
+    const newPreviews = files.map(f => URL.createObjectURL(f));
+    setGalleryPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeGalleryImage = (index) => {
+    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+    setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index) => {
+    setExistingGallery(prev => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(form, file);
+        onSubmit(form, file, galleryFiles, existingGallery);
       }}
       className="p-5 sm:p-6 space-y-4"
     >
@@ -273,7 +294,7 @@ const ProjectForm = ({
 
         <div className="sm:col-span-2 space-y-1.5">
           <label className="text-xs text-indigo-300/70 uppercase tracking-wider font-medium">
-            Project Image
+            Project Main Image
           </label>
           <label className="flex items-center gap-4 w-full bg-[#0d0d22] border border-dashed border-white/15 rounded-xl px-4 py-4 cursor-pointer hover:border-indigo-500/40 hover:bg-white/4 transition-all">
             {preview ? (
@@ -289,7 +310,7 @@ const ProjectForm = ({
             )}
             <div>
               <p className="text-sm text-gray-300">
-                {preview ? "Change image" : "Click to upload image"}
+                {preview ? "Change main image" : "Click to upload main image"}
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 PNG, JPG, WEBP supported
@@ -302,6 +323,54 @@ const ProjectForm = ({
               className="hidden"
             />
           </label>
+        </div>
+
+        <div className="sm:col-span-2 space-y-3">
+          <label className="text-xs text-indigo-300/70 uppercase tracking-wider font-medium">
+            Project Gallery
+          </label>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {existingGallery.map((img, idx) => (
+              <div key={`old-${idx}`} className="relative group aspect-video rounded-lg overflow-hidden border border-white/10 bg-white/5">
+                <img src={img} className="w-full h-full object-cover" alt="Gallery" />
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                   <button
+                     type="button"
+                     onClick={() => removeExistingImage(idx)}
+                     className="p-1.5 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                   >
+                     <Trash2 className="w-3.5 h-3.5" />
+                   </button>
+                </div>
+              </div>
+            ))}
+            
+            {galleryPreviews.map((preview, idx) => (
+              <div key={`new-${idx}`} className="relative group aspect-video rounded-lg overflow-hidden border border-indigo-500/30 bg-indigo-500/5">
+                <img src={preview} className="w-full h-full object-cover" alt="Preview" />
+                <button
+                  type="button"
+                  onClick={() => removeGalleryImage(idx)}
+                  className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+
+            <label className="flex flex-col items-center justify-center aspect-video rounded-lg border border-dashed border-white/15 hover:border-indigo-500/40 hover:bg-white/4 cursor-pointer transition-all">
+              <Plus className="w-5 h-5 text-gray-500" />
+              <span className="text-[10px] text-gray-500 mt-1">Add More</span>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleGalleryChange}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -361,38 +430,33 @@ export default function Projects() {
     return data.publicUrl;
   };
 
-  const handleCreate = async (form, file) => {
-    setUploading(true);
-    let imgUrl = "";
-    if (file) imgUrl = await uploadImage(file);
-    await supabase.from("projects").insert({
-      Title: form.Title,
-      Description: form.Description,
-      Img: imgUrl,
-      TechStack: form.TechStack.split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      Features: form.Features.split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      Link: form.Link,
-      Github: form.Github,
-    });
-    setShowCreate(false);
-    setUploading(false);
-    fetchProjects();
+  const uploadMultipleImages = async (files) => {
+    const urls = [];
+    for (const file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
+      await supabase.storage.from("project-images").upload(fileName, file);
+      const { data } = supabase.storage.from("project-images").getPublicUrl(fileName);
+      urls.push(data.publicUrl);
+    }
+    return urls;
   };
 
-  const handleEdit = async (form, file) => {
+  const handleCreate = async (form, mainFile, galleryFiles, existingGallery = []) => {
     setUploading(true);
-    let imgUrl = editProject.Img || "";
-    if (file) imgUrl = await uploadImage(file);
-    await supabase
-      .from("projects")
-      .update({
+    try {
+      let imgUrl = "";
+      if (mainFile) imgUrl = await uploadImage(mainFile);
+      let galleryUrls = [...existingGallery];
+      if (galleryFiles && galleryFiles.length > 0) {
+        const newUrls = await uploadMultipleImages(galleryFiles);
+        galleryUrls = [...galleryUrls, ...newUrls];
+      }
+      
+      const { error } = await supabase.from("projects").insert({
         Title: form.Title,
         Description: form.Description,
         Img: imgUrl,
+        gallery: galleryUrls,
         TechStack: form.TechStack.split(",")
           .map((s) => s.trim())
           .filter(Boolean),
@@ -401,11 +465,54 @@ export default function Projects() {
           .filter(Boolean),
         Link: form.Link,
         Github: form.Github,
-      })
-      .eq("id", editProject.id);
-    setEditProject(null);
-    setUploading(false);
-    fetchProjects();
+      });
+      if (error) throw error;
+      setShowCreate(false);
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      setUploading(false);
+      fetchProjects();
+    }
+  };
+
+  const handleEdit = async (form, mainFile, galleryFiles, updatedExistingGallery) => {
+    setUploading(true);
+    try {
+      let imgUrl = editProject.Img || "";
+      if (mainFile) imgUrl = await uploadImage(mainFile);
+      
+      let galleryUrls = updatedExistingGallery || [];
+      if (galleryFiles && galleryFiles.length > 0) {
+        const newUrls = await uploadMultipleImages(galleryFiles);
+        galleryUrls = [...galleryUrls, ...newUrls];
+      }
+      
+      const { error } = await supabase
+        .from("projects")
+        .update({
+          Title: form.Title,
+          Description: form.Description,
+          Img: imgUrl,
+          gallery: galleryUrls,
+          TechStack: form.TechStack.split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          Features: form.Features.split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          Link: form.Link,
+          Github: form.Github,
+        })
+        .eq("id", editProject.id);
+      if (error) throw error;
+      setEditProject(null);
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      setUploading(false);
+      fetchProjects();
+    }
   };
 
   const deleteProject = async (id) => {

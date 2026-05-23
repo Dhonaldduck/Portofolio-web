@@ -24,7 +24,7 @@ const MainTitle = memo(() => (
       <span className="relative inline-block">
         <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
         <span className="relative bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-          Frontend
+          Security and Apps
         </span>
       </span>
       <br />
@@ -76,12 +76,11 @@ const SocialLink = memo(({ icon: Icon, link, label }) => (
 const TYPING_SPEED = 100;
 const ERASING_SPEED = 50;
 const PAUSE_DURATION = 2000;
-const WORDS = ["Network & Telecom Student", "Tech Enthusiast"];
+const WORDS = ["Information Technology Student", "Tech Enthusiast"];
 const TECH_STACK = ["React", "Javascript", "Node.js", "Tailwind"];
 const SOCIAL_LINKS = [
-  { icon: Github, link: "https://github.com/EkiZR", label: "GitHub Profile" },
-  { icon: Linkedin, link: "https://www.linkedin.com/in/ekizr/", label: "LinkedIn Profile" },
-  { icon: Instagram, link: "https://www.instagram.com/ekizr_/?hl=id", label: "Instagram Profile" }
+  { icon: Github, link: "https://github.com/Dhonaldduck", label: "GitHub Profile" },
+  { icon: Linkedin, link: "https://www.linkedin.com/in/dhona-aribah-6b051225b/", label: "LinkedIn Profile" }
 ];
 
 const Home = () => {
@@ -140,25 +139,24 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>Eki Zulfar Rachman — Frontend Web Developer</title>
-        <meta name="description" content="Website resmi Eki Zulfar Rachman, Front-End Web Developer. Saya berfokus pada penciptaan pengalaman digital yang menarik dan selalu berupaya memberikan solusi terbaik dalam setiap proyek yang saya kerjakan." />
+        <title>Dhona Aribah — Information Technology Student</title>
+        <meta name="description" content="Website resmi Dhona Aribah. Saya berfokus pada pengembangan aplikasi dan keamanan siber." />
      <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://ekizr.com" />
-        <meta property="og:title" content="Eki Zulfar Rachman — Frontend Web Developer" />
-     <meta property="og:description" content="Website resmi dan portofolio Eki Zulfar Rachman, Front-End Web Developer." />
+        <meta property="og:title" content="Dhona Aribah — Apps and Security Dev" />
+     <meta property="og:description" content="Website resmi dan portofolio Dhona Aribah." />
         <meta property="og:url" content="https://ekizr.com" />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{`
           {
             "@context": "https://schema.org",
             "@type": "Person",
-            "name": "Eki Zulfar Rachman",
-            "jobTitle": "Frontend Developer",
+            "name": "Dhona Aribah",
+            "jobTitle": "Information Technology Student",
             "url": "https://ekizr.com",
             "sameAs": [
-              "https://github.com/EkiZR",
-              "https://www.linkedin.com/in/ekizr/",
-              "https://www.instagram.com/ekizr_/"
+              "https://github.com/Dhonaldduck",
+              "https://www.linkedin.com/in/dhona-aribah-6b051225b/"
             ]
           }
         `}</script>
@@ -188,7 +186,8 @@ const Home = () => {
                   <p className="text-base md:text-lg text-gray-400 max-w-xl leading-relaxed font-light"
                     data-aos="fade-up"
                     data-aos-delay="1000">
-                    Menciptakan Website Yang Inovatif, Fungsional, dan User-Friendly untuk Solusi Digital.
+                    a consistent and innovative person at design professional with some years of experience. Implementing and optimizing. Also
+                    committed to continuous learning, whether through courses or hands-on projects.
                   </p>
 
                   {/* Tech Stack */}
@@ -229,7 +228,7 @@ const Home = () => {
                     isHovering ? "scale-105" : "scale-100"
                   }`}>
                     <img
-                      src="Animation1.gif"
+                      src="animation5.gif"
                       alt="Developer Animation"
                       className={`w-full h-full object-contain transition-all duration-500 ${
                         isHovering 

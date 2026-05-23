@@ -14,6 +14,7 @@ import {
   Package,
   Cpu,
   Code,
+  ImageIcon,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { toSlug } from "../utils/slug";
@@ -156,25 +157,25 @@ const ProjectDetails = () => {
     );
   }
 
-  const projectUrl = `https://ekizr.com/project/${toSlug(project.Title)}`;
-
+  const projectUrl = `https://github.com/Dhonaldduck/project/${toSlug(project.Title)}`;
+  
   return (
     <>
       <Helmet>
-        <title>{project.Title} — Eki Zulfar Rachman</title>
+        <title>{project.Title} — Dhona Aribah</title>
         <meta
           name="description"
           content={
             project.Description
               ? project.Description.slice(0, 155)
-              : `Project ${project.Title} oleh Eki Zulfar Rachman — Frontend Web Developer.`
+              : `Project ${project.Title} oleh Dhona Aribah.`
           }
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={projectUrl} />
         <meta
           property="og:title"
-          content={`${project.Title} — Eki Zulfar Rachman`}
+          content={`${project.Title} — Dhona Aribah`}
         />
         <meta
           property="og:description"
@@ -192,8 +193,8 @@ const ProjectDetails = () => {
             "url": "${projectUrl}",
             "author": {
               "@type": "Person",
-              "name": "Eki Zulfar Rachman",
-              "url": "https://ekizr.com"
+              "name": "Dhona Aribah",
+              "url": "https://github.com/Dhonaldduck"
             }
           }
         `}</script>
@@ -323,10 +324,43 @@ const ProjectDetails = () => {
                 </div>
               </div>
             </div>
+
+            {/* Gallery Section */}
+            {project.gallery && project.gallery.length > 0 && (
+              <div className="mt-16 space-y-6 animate-fadeIn">
+                <h3 className="text-xl md:text-2xl font-semibold text-white/90 flex items-center gap-3">
+                  <ImageIcon className="w-5 h-5 text-blue-400" />
+                  Project Gallery
+                </h3>
+                <div className="columns-2 sm:columns-3 lg:columns-4 gap-4 space-y-4">
+                  {project.gallery.map((img, index) => (
+                    <div 
+                      key={index} 
+                      className="break-inside-avoid mb-4"
+                    >
+                      <div className="relative group bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-2xl p-2 transition-all duration-300 hover:bg-white/[0.05] hover:border-white/20 hover:shadow-xl">
+                        <div className="relative rounded-xl overflow-hidden">
+                          <img
+                            src={img}
+                            alt={`Gallery ${index}`}
+                            className="w-full h-auto transform transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                            <div className="p-2 bg-black/50 backdrop-blur-md rounded-full border border-white/20">
+                              <ImageIcon className="w-3 h-3 text-white" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <style jsx>{`
+        <style>{`
           @keyframes blob {
             0% {
               transform: translate(0px, 0px) scale(1);
